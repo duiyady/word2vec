@@ -1,2 +1,1 @@
-d# word2veca
-java重写word2vec
+java实现word2vec
