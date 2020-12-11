@@ -1,6 +1,7 @@
 package com.duiya.model;
 
 import java.util.List;
+import java.util.Objects;
 
 public class VocabWord {
     private long count; // 出现的次数
@@ -50,5 +51,18 @@ public class VocabWord {
 
     public void setCodelen(int codelen) {
         this.codelen = codelen;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VocabWord vocabWord = (VocabWord) o;
+        return word == vocabWord.word;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(count, point, word, code, codelen);
     }
 }
