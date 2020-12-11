@@ -7,7 +7,7 @@ public class VocabWord {
     private List<Integer> point;  //路径
     private String word;  //词
     private List<Integer> code; //哈夫曼编码
-    private int codelen;
+    private int codelen;  //编码长度
 
     public VocabWord() {
     }
