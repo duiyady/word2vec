@@ -7,6 +7,10 @@ public class ExpTable {
     private int MAX_EXP = 6;
     private float[] expTable;
 
+    public ExpTable() {
+        init();
+    }
+
     public ExpTable(int EXP_TABLE_SIZE, int MAX_EXP) {
         this.EXP_TABLE_SIZE = EXP_TABLE_SIZE;
         this.MAX_EXP = MAX_EXP;
