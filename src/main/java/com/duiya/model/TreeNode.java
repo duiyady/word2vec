@@ -9,7 +9,7 @@ public class TreeNode {
     private int vocabIndex;  // 词表的位置
     private int hiddenEmbeddingIndex;  // 词嵌入位置
     private int watch;
-    private static ArrayList<TreeNode> treeNodes = new ArrayList<>();
+    private static ArrayList<TreeNode> treeNodes = new ArrayList<TreeNode>();
 
     public int getWatch() {
         return watch;

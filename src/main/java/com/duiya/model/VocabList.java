@@ -20,13 +20,13 @@ public class VocabList {
         this.vocabHashSize = 30000000;
 
         this.hash_index = new int[this.vocabHashSize];
-        this.vocabList = new ArrayList<>(1000);
+        this.vocabList = new ArrayList<Vocab>(1000);
         init();
 
     }
 
     public VocabList(int len, int vocabHashSize) {
-        this.vocabList = new ArrayList<>(len);
+        this.vocabList = new ArrayList<Vocab>(len);
         this.hash_index = new int[vocabHashSize];
         this.vocabHashSize = vocabHashSize;
         init();
@@ -92,7 +92,11 @@ public class VocabList {
      */
     public int getWordHash(String str) {
         int hash = str.hashCode();
-        hash = hash % this.vocabHashSize;
+        if(hash >= 0) {
+            hash = hash % this.vocabHashSize;
+        }else {
+            hash = this.vocabHashSize + hash % this.vocabHashSize;
+        }
         return hash;
     }
 
@@ -102,7 +106,7 @@ public class VocabList {
     public void reduceVocab(){
         int b = 0;
         for(int i = 0; i < this.vocabList.size(); i++){
-            if (this.vocabList.get(i).getCount() > this.minRudece){
+            if (this.vocabList.get(i).getCount() > this.minRudece && !this.vocabList.get(i).getWord().equals("</s>") && !this.vocabList.get(i).getWord().equals("</default>")){
                 this.vocabList.get(b).setWord(this.vocabList.get(i).getWord());
                 this.vocabList.get(b).setCount(this.vocabList.get(i).getCount());
                 b += 1;
@@ -210,7 +214,7 @@ public class VocabList {
      */
     public void initHiddenEmbedding(int embeddingSize, int haff){
         if (haff == 1){
-            this.hidden_embedding = new float[this.vocabList.size()*2 - 1][embeddingSize];
+            this.hidden_embedding = new float[this.vocabList.size() - 1][embeddingSize];  // 哈夫曼树
         }else {
             this.hidden_embedding = new float[this.vocabList.size()][embeddingSize];
         }
@@ -222,7 +226,6 @@ public class VocabList {
         }
     }
 
-
     /**
      * 构造哈夫曼树
      */
@@ -230,13 +233,12 @@ public class VocabList {
         int nowHiddenIndex = 0;
         int vocabIndex = 0;
         while (vocabIndex < this.vocabList.size()){
-            if(TreeNode.getListSize() < 2){
+            if(TreeNode.getListSize() < 2){  // 从列表中添加点
                 TreeNode node = new TreeNode(this.vocabList.get(vocabIndex).getCount());
-                node.setHiddenEmbeddingIndex(nowHiddenIndex++);
                 node.setVocabIndex(vocabIndex++);
                 TreeNode.addToList(node);
             }else {
-                if(this.vocabList.get(vocabIndex).getCount() >= TreeNode.getFromList(1).getValue()){
+                if(this.vocabList.get(vocabIndex).getCount() >= TreeNode.getFromList(1).getValue()){  // 合并点
                     TreeNode right = TreeNode.popFromList();
                     TreeNode left = TreeNode.popFromList();
                     TreeNode node = new TreeNode(right.getValue()+left.getValue());
@@ -244,9 +246,8 @@ public class VocabList {
                     node.setRight(right);
                     node.setHiddenEmbeddingIndex(nowHiddenIndex++);
                     TreeNode.addToList(node);
-                }else {
+                }else { // 从列表中添加点
                     TreeNode node = new TreeNode(this.vocabList.get(vocabIndex).getCount());
-                    node.setHiddenEmbeddingIndex(nowHiddenIndex++);
                     node.setVocabIndex(vocabIndex++);
                     TreeNode.addToList(node);
                 }
@@ -264,8 +265,8 @@ public class VocabList {
         }
         TreeNode root = TreeNode.getFromList(0);
 
-        List<TreeNode> path = new ArrayList<>();
-        List<Integer> direct = new ArrayList<>();
+        List<TreeNode> path = new ArrayList<TreeNode>();
+        List<Integer> direct = new ArrayList<Integer>();
         path.add(root);
         while (path.size() > 0){
             TreeNode node = path.get(path.size()-1);
@@ -275,17 +276,18 @@ public class VocabList {
                     path.add(node.getLeft());
                     direct.add(1);
                 }else { // 这是叶子节点
-                    List<Integer> pathIndex = new ArrayList<>();
+                    List<Integer> pathIndex = new ArrayList<Integer>();
+                    path.remove(path.size()-1);
                     for(TreeNode val : path){
                         pathIndex.add(val.getHiddenEmbeddingIndex());
                     }
-                    List<Integer> pathDirect = new ArrayList<>();
+                    List<Integer> pathDirect = new ArrayList<Integer>();
                     for(Integer val : direct){
                         pathDirect.add(val);
                     }
                     this.vocabList.get(node.getVocabIndex()).setCode(pathDirect);
                     this.vocabList.get(node.getVocabIndex()).setPoint(pathIndex);
-                    path.remove(path.size()-1);
+
                     direct.remove(direct.size()-1);
                 }
             }else if(node.getWatch() == 1){//已经看过左子树
@@ -294,7 +296,7 @@ public class VocabList {
                 direct.add(0);
             }else if(node.getWatch() == 2){//去掉
                 path.remove(path.size()-1);
-                if(path.size()>1) {
+                if(direct.size()>0) {
                     direct.remove(direct.size() - 1);
                 }
             }

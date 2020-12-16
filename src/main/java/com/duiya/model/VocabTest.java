@@ -15,6 +15,7 @@ public class VocabTest {
         VocabList vocabList = new VocabList();
 
         vocabList.add("</s>");
+        vocabList.add("</default>");
         for(String str: list){
             vocabList.add(str);
         }
