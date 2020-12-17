@@ -14,6 +14,7 @@ public class VocabList {
     private int[] negativeSamplingTable = new int[table_size];
     private float[][] embedding;
     private float[][] hidden_embedding;
+    private Random random;
 
     public VocabList() {
         this.minRudece = 2;
@@ -36,6 +37,18 @@ public class VocabList {
         for(int i = 0; i < this.hash_index.length; i++){
             this.hash_index[i] = -1;
         }
+    }
+
+    public int[] getNegativeSamplingTable() {
+        return negativeSamplingTable;
+    }
+
+    public float[][] getEmbedding() {
+        return embedding;
+    }
+
+    public float[][] getHidden_embedding() {
+        return hidden_embedding;
     }
 
     /**
@@ -185,12 +198,18 @@ public class VocabList {
             this.negativeSamplingTable[a] = i;
             if((a+1)/(double)this.table_size > nowPow){
                 i++;
-                nowPow += Math.pow(vocabList.get(i).getCount(), power);
+                nowPow += Math.pow(vocabList.get(i).getCount(), power)/trainWordPow;
             }
             if(i > this.vocabList.size()){
                 i = this.vocabList.size() - 1;
             }
         }
+        this.random = new Random();
+    }
+
+    public int getNextNegativeSample(){
+        int value = random.nextInt(this.table_size);
+        return this.negativeSamplingTable[value];
     }
 
     /**

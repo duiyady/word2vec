@@ -1,6 +1,5 @@
 package com.duiya.model;
 
-import java.nio.file.attribute.UserPrincipalLookupService;
 
 public class ExpTable {
     private int EXP_TABLE_SIZE = 1000;
@@ -25,5 +24,15 @@ public class ExpTable {
         }
     }
 
-
+    public float getExp(float value){
+        int index = 0;
+        if(value >= MAX_EXP){
+            index = EXP_TABLE_SIZE-1;
+        }else if(value <= -MAX_EXP){
+            index = 0;
+        }else {
+            index = (int) ((value + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2));
+        }
+        return expTable[index];
+    }
 }
